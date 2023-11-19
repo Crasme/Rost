@@ -4,4 +4,4 @@ build:
 	python3 tools/build.py
 
 run:
-	qemu-system-i386 os.hex
+	qemu-system-i386 output/os.bin
