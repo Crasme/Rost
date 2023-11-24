@@ -11,6 +11,10 @@ command = lambda command : os.system(command)
 
 log("Lancement du build", Log.INFO)
 
-command("nasm src/os.asm -o output/os.bin")
+command("clear")
+command("cd rost && cargo build")
+command("rm ./output/rost.iso")
+command("cd rost && cargo bootimage")
+command("mv ./rost/target/x86_64-rost/debug/bootimage-rost.bin ./output/rost.iso")
 
 log("Build terminé", Log.INFO)

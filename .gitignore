@@ -1,1 +1,10 @@
 output/*.bin
+
+rost/debug/
+rost/target/
+
+rost/Cargo.lock
+
+output/*
+
+**/*.rs.bk
