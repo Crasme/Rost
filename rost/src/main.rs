@@ -2,6 +2,8 @@
 #![no_main]
 
 #![feature(custom_test_frameworks)]
+#![feature(abi_x86_interrupt)]
+
 #![test_runner(crate::libs::tests::test_runner)]
 
 #![reexport_test_harness_main = "test_main"]
@@ -24,6 +26,8 @@ fn panic(info: &PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Boot complete");
+
+    libs::init(); // doit être au dessus des tests
 
     // Lance les tests
     #[cfg(test)]
