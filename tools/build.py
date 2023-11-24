@@ -9,12 +9,31 @@ class Log:
 log = lambda text, level : colorprint(f"[{level[1]}] {text}", color=level[0])
 command = lambda command : os.system(command)
 
-log("Lancement du build", Log.INFO)
+def build():
+    command("clear")
+    log("Lancement du build", Log.INFO)
 
-command("clear")
-command("cd rost && cargo build")
-command("rm ./output/rost.iso")
-command("cd rost && cargo bootimage")
-command("mv ./rost/target/x86_64-rost/debug/bootimage-rost.bin ./output/rost.iso")
+    command("cd rost && cargo build")
+    command("rm ./output/rost.iso")
+    command("cd rost && cargo bootimage")
+    command("mv ./rost/target/x86_64-rost/debug/bootimage-rost.bin ./output/rost.iso")
 
-log("Build terminé", Log.INFO)
+    log("Fin du build", Log.INFO)
+
+def test():
+    command("clear")
+    log("Lancement des tests", Log.INFO)
+
+    command("cd rost && cargo test")
+
+    log("Fin des tests", Log.INFO)
+
+import sys
+match sys.argv[1]:
+    case "build":
+        build()
+    case "test":
+        test()
+    case _:
+        log("Commande inconnue", Log.ERROR)
+        exit(1)

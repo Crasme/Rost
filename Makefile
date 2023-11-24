@@ -1,7 +1,7 @@
 .PHONY: build, run, clean
 
 build:
-	python3 tools/build.py
+	python3 tools/build.py build
 
 run:
 	qemu-system-x86_64 -drive format=raw,file=output/rost.iso
@@ -24,3 +24,6 @@ crun:
 	make clean
 	make build
 	make run
+
+test:
+	python3 tools/build.py test
