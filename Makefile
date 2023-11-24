@@ -4,14 +4,14 @@ build:
 	python3 tools/build.py build
 
 run:
-	qemu-system-x86_64 -drive format=raw,file=output/rost.iso
+	python3 tools/build.py run
 
 brun:
 	make build
 	make run
 
 clean:
-	rm -f ./output/*
+	rm -Rf ./output
 	rm -f -Rf ./rost/target
 	rm -f ./rost/Cargo.lock
 	rm -f -Rf ./tools/__pycache__

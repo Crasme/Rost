@@ -18,7 +18,7 @@ mod libs;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    libs::general::hlt_loop();
 }
 
 // OTHER
@@ -32,6 +32,12 @@ pub extern "C" fn _start() -> ! {
     // Lance les tests
     #[cfg(test)]
     test_main();
+
+    drivers::disk::write_sector(1, [0 as u32; 128]);
+
+    println!("Ecrit !");
+
+    loop {}
 
     libs::general::hlt_loop();
 }

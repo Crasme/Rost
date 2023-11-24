@@ -12,7 +12,7 @@ fn panic(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     drivers::qemu::exit_qemu(drivers::qemu::QemuExitCode::Failed);
-    loop {}
+    libs::general::hlt_loop()
 }
 
 pub trait Testable {

@@ -15,6 +15,7 @@ def build():
 
     # TODO : passer sur les fichiers et vérifier le formatage
 
+    command("mkdir output")
     command("cd rost && cargo build")
     command("rm ./output/rost.iso")
     command("cd rost && cargo bootimage")
@@ -30,12 +31,22 @@ def test():
 
     log("Fin des tests", Log.INFO)
 
+def run():
+    command("clear")
+    log("Lancement de Rost", Log.INFO)
+
+    command("qemu-system-x86_64 -drive format=raw,file=output/rost.iso")
+
+    log("Arret de Rost", Log.INFO)
+
 import sys
 match sys.argv[1]:
     case "build":
         build()
     case "test":
         test()
+    case "run":
+        run()
     case _:
         log("Commande inconnue", Log.ERROR)
         exit(1)
