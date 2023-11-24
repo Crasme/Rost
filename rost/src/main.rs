@@ -6,22 +6,15 @@ use core::panic::PanicInfo;
 mod drivers;
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
     // TODO : show message error
-    drivers::vga::print(
-        b"Fatal Error", 
-        drivers::vga::Color::Red
-    );
-
+    println!("Erreur fatale.");
+    println!("{}", info);
     loop {}
 }
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    drivers::vga::print(
-        b"coucou !", 
-        drivers::vga::Color::Red
-    );
-
+    println!("Boot complete");
     loop {}
 }
