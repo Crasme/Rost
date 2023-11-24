@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum QemuExitCode {

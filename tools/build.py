@@ -13,6 +13,8 @@ def build():
     command("clear")
     log("Lancement du build", Log.INFO)
 
+    # TODO : passer sur les fichiers et vérifier le formatage
+
     command("cd rost && cargo build")
     command("rm ./output/rost.iso")
     command("cd rost && cargo bootimage")
