@@ -54,12 +54,20 @@ def run():
 
     log("Arret de Rost", Log.INFO)
 
+def help():
+    print("Commands :")
+    print("  make build   // compiles the os")
+    print("  make run     // build the disk and run the os")
+    print("  make clear   // cleans everything")
+
 import sys
 match sys.argv[1]:
     case "build":
         build()
     case "run":
         run()
+    case "help":
+        help()
     case _:
         log("Commande inconnue", Log.ERROR)
         exit(1)
