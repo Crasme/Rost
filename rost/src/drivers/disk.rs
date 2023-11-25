@@ -32,7 +32,14 @@ pub enum STATUS {
     StatusErr  = 0x01,
 }
 
+pub fn is_ok(raw: u32) {
+    if raw >= get_sectors_count() && DISK_STATE.lock().end != 0 {
+        panic!("Disk error : sector too big : {} (max {})", raw, get_sectors_count()-1);
+    }
+}
+
 pub fn write_sector(raw_sector_nb: u32, data: [u32; 128]) {
+    is_ok(raw_sector_nb);
     let sector_nb = raw_sector_nb + DISK_STATE.lock().start;
     ata_wait_bzy();
     ata_wait_rdy();
@@ -55,6 +62,7 @@ pub fn write_sector(raw_sector_nb: u32, data: [u32; 128]) {
 }
 
 pub fn read_sector(raw_sector_nb: u32) -> [u32; 128] {
+    is_ok(raw_sector_nb);
     let sector_nb = raw_sector_nb + DISK_STATE.lock().start;
     let mut data = [0; 128];
     ata_wait_bzy();

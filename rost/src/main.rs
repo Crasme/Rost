@@ -24,8 +24,9 @@ pub extern "C" fn _start() -> ! {
     let l = [64; 128];
     println!("Ecrit2 !");
     drivers::disk::write_sector(0, l);
-    println!("Ecrit !");
+    println!("Ecrit !",);
     println!("{:?}", drivers::disk::read_sector(0)[0]);
+    println!("{:?}", drivers::disk::read_sector(999)[0]);
 
     libs::general::hlt_loop();
 }
