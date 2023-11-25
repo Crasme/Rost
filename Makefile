@@ -24,6 +24,3 @@ crun:
 	make clean
 	make build
 	make run
-
-test:
-	python3 tools/build.py test

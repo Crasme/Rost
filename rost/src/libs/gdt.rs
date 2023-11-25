@@ -44,4 +44,3 @@ pub fn init() {
         load_tss(GDT.1.tss_selector);
     }
 }
-

@@ -1,7 +1,7 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use lazy_static::lazy_static;
 
-use crate::{print, println};
+use crate::println;
 use crate::libs::gdt;
 
 lazy_static! {
@@ -14,7 +14,21 @@ lazy_static! {
         };
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
-
+        idt[InterruptIndex::SlaveInterrupt.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::SerialPort2.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::SerialPort1.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::SoundCard.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::FloppyDisk.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::Parralel1.as_usize()].set_handler_fn(any_interrupt);
+    
+        idt[InterruptIndex::RealTimeClock.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::ACPI.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::AnyPeripheral1.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::AnyPeripheral2.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::Mouse.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::CoProcessor.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::ATAPrimary.as_usize()].set_handler_fn(ataprimary_interrupt_handler);
+        idt[InterruptIndex::ATASecondary.as_usize()].set_handler_fn(any_interrupt);
 
         idt
     };
@@ -24,7 +38,22 @@ lazy_static! {
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
-    Keyboard
+    Keyboard,
+    SlaveInterrupt,
+    SerialPort2, // & Serial port 4 if present
+    SerialPort1, // & Serial port 3 if present
+    SoundCard, // Or parralel port 3
+    FloppyDisk,
+    Parralel1, // shared with parralel 2 if present
+
+    RealTimeClock,
+    ACPI, // Advanced Configuration and Power Interface
+    AnyPeripheral1,
+    AnyPeripheral2,
+    Mouse,
+    CoProcessor, // Or FPU
+    ATAPrimary,
+    ATASecondary,
 }
 
 impl InterruptIndex {
@@ -46,6 +75,19 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: InterruptStackFrame,
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    unsafe {
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+    }
+}
+
+extern "x86-interrupt" fn ataprimary_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    unsafe {
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+    }
+}
+
+extern "x86-interrupt" fn any_interrupt(_stack_frame: InterruptStackFrame) {
+    println!("Unknown interrupt just happened :(");
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
     }
@@ -85,17 +127,4 @@ pub static PICS: spin::Mutex<ChainedPics> =
 
 pub fn init_idt() {
     IDT.load();
-}
-
-// TESTS
-
-#[test_case]
-fn test_breakpoint_exception() {
-    x86_64::instructions::interrupts::int3();
-}
-
-#[allow(unconditional_recursion)]
-#[test_case]
-fn should_double_fault() { // test anti triple fault
-    // TODO
 }

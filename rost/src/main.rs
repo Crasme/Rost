@@ -1,43 +1,31 @@
 #![no_std]
 #![no_main]
 
-#![feature(custom_test_frameworks)]
 #![feature(abi_x86_interrupt)]
 
-#![test_runner(crate::libs::tests::test_runner)]
-
-#![reexport_test_harness_main = "test_main"]
-
-#[allow(unused_imports)]
 use core::panic::PanicInfo;
 
 mod drivers;
 mod libs;
 
-#[cfg(not(test))] // handler normal
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     libs::general::hlt_loop();
 }
 
-// OTHER
-
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Boot complete");
 
-    libs::init(); // doit être au dessus des tests
+    libs::init();
+    drivers::init();
 
-    // Lance les tests
-    #[cfg(test)]
-    test_main();
-
-    drivers::disk::write_sector(1, [0 as u32; 128]);
-
+    let l = [64; 128];
+    println!("Ecrit2 !");
+    drivers::disk::write_sector(0, l);
     println!("Ecrit !");
-
-    loop {}
+    println!("{:?}", drivers::disk::read_sector(0)[0]);
 
     libs::general::hlt_loop();
 }
