@@ -7,6 +7,7 @@ use core::panic::PanicInfo;
 
 mod drivers;
 mod libs;
+mod apps;
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
@@ -20,13 +21,7 @@ pub extern "C" fn _start() -> ! {
 
     libs::init();
     drivers::init();
-
-    let l = [64; 128];
-    println!("Ecrit2 !");
-    drivers::disk::write_sector(0, l);
-    println!("Ecrit !",);
-    println!("{:?}", drivers::disk::read_sector(0)[0]);
-    println!("{:?}", drivers::disk::read_sector(999)[0]);
+    apps::init();
 
     libs::general::hlt_loop();
 }

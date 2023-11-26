@@ -1,8 +1,13 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use pc_keyboard::{layouts, HandleControl, Keyboard, ScancodeSet1};
+
 use lazy_static::lazy_static;
 
-use crate::println;
 use crate::libs::gdt;
+use crate::println;
+
+use pic8259::ChainedPics;
+use spin::Mutex;
 
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
@@ -46,7 +51,7 @@ pub enum InterruptIndex {
     FloppyDisk,
     Parralel1, // shared with parralel 2 if present
 
-    RealTimeClock,
+    RealTimeClock = PIC_2_OFFSET,
     ACPI, // Advanced Configuration and Power Interface
     AnyPeripheral1,
     AnyPeripheral2,
@@ -54,6 +59,8 @@ pub enum InterruptIndex {
     CoProcessor, // Or FPU
     ATAPrimary,
     ATASecondary,
+
+    AnyInterrupt,
 }
 
 impl InterruptIndex {
@@ -80,22 +87,31 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+
+    use crate::drivers::keyboard;
+
+    keyboard::run_handlers(&KEYBOARD);
+
+    unsafe {
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
+    }
+}
+
 extern "x86-interrupt" fn ataprimary_interrupt_handler(_stack_frame: InterruptStackFrame) {
     // Should we really ignore this?
     unsafe {
-        PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::ATAPrimary.as_u8());
     }
 }
 
 extern "x86-interrupt" fn any_interrupt(_stack_frame: InterruptStackFrame) {
     println!("Unknown interrupt just happened :(");
     unsafe {
-        PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::AnyInterrupt.as_u8());
     }
 }
 
-use pc_keyboard::{layouts, HandleControl, Keyboard, ScancodeSet1};
-use spin::Mutex;
 lazy_static! {
     pub static ref KEYBOARD: Mutex<Keyboard<layouts::Azerty, ScancodeSet1>> =
         Mutex::new(
@@ -103,25 +119,11 @@ lazy_static! {
         );
 }
 
-extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-
-    use crate::drivers::keyboard;
-
-    keyboard::run_scancode(&KEYBOARD);
-
-    unsafe {
-        PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
-    }
-}
-
-use pic8259::ChainedPics;
-use spin;
-
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
 
-pub static PICS: spin::Mutex<ChainedPics> =
-    spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
+pub static PICS: Mutex<ChainedPics> =
+    Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
 
 
 // INIT

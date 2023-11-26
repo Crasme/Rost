@@ -41,8 +41,8 @@ struct Char {
     color_code: Couleur,
 }
 
-const BUFFER_HEIGHT: usize = 25;
-const BUFFER_WIDTH: usize = 80;
+pub const BUFFER_HEIGHT: usize = 25;
+pub const BUFFER_WIDTH: usize = 80;
 
 #[repr(transparent)]
 
@@ -109,6 +109,36 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
+
+    fn clear_screen(&mut self) {
+        // we clear all rows
+        for row in 0..BUFFER_HEIGHT {
+            self.clear_row(row);
+        }
+    }
+
+    fn remove_char(&mut self) {
+        if self.colonne == 0 {
+            // we do not want to remove outside of the buffer
+            return;
+        }
+        self.colonne -= 1;
+        let ligne = BUFFER_HEIGHT-1;
+        let colonne = self.colonne;
+        let blank = Char {
+            ascii_character: b' ',
+            color_code: self.couleur,
+        };
+        self.buffer.chars[ligne][colonne].write(blank);
+    }
+}
+
+pub fn remove_char() {
+    WRITER.lock().remove_char();
+}
+
+pub fn clear_screen() {
+    WRITER.lock().clear_screen();
 }
 
 use core::fmt;

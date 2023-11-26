@@ -49,7 +49,7 @@ pub fn write_sector(raw_sector_nb: u32, data: [u32; 128]) {
         Port::new(0x1F2).write(0x01 as u8);
         Port::new(0x1F3).write(sector_nb as u8);
         Port::new(0x1F4).write((sector_nb >> 8) as u8);
-        Port::new(0x1F5,).write((sector_nb >> 16) as u8);
+        Port::new(0x1F5).write((sector_nb >> 16) as u8);
         Port::new(0x1F7).write(0x30 as u8);
     }
     ata_wait_bzy();
