@@ -77,7 +77,7 @@ def colorprint(text: str, color="", code = "") -> None:
     print(f"{style}\033[38;2;{r};{g};{b}m{text}\033[38;2;255;255;255m\033[00m", end = endl, flush = True)
 
 
-def colorinput(text: str, color="", code = "") -> None:
+def colorinput(text: str, color="", code = "") -> str:
     """
         colored input
 

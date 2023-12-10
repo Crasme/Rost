@@ -7,6 +7,9 @@ use crate::print;
 
 use crate::drivers;
 use crate::drivers::keyboard;
+use crate::println;
+
+use alloc::boxed::Box;
 
 // init of a buffer (list of chars) and a cursor
 pub struct Writer {
@@ -72,6 +75,7 @@ fn is_the_same(command: [char; drivers::vga::BUFFER_WIDTH], raw_command: &str) -
     return true;
 }
 
+// TO ADD : https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html
 fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
     // we print a new line
     print!("\n");
@@ -82,6 +86,14 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
         print!("clear : clear the screen\n");
     } else if is_the_same(command, "clear") {
         drivers::vga::clear_screen();
+    } else if is_the_same(command, "stop") {
+        drivers::qemu::exit_qemu();
+    } else if is_the_same(command, "reboot") {
+        drivers::qemu::restart_qemu();
+    } else if is_the_same(command, "test") {
+        let y = Box::new(42);
+        println!("{}", y);
+        println!("{}", *y);
     } else {
         print!("Unknown command : ");
         print_buffer(command);
@@ -104,7 +116,7 @@ fn run_key(key: DecodedKey) {
             writer.remove();
         }
         DecodedKey::Unicode(key) => {
-            // if the key is a printable char
+            // ie the key is a printable char
             if key.is_ascii() {
                 writer.write_char(key);
                 print!("{}", key);

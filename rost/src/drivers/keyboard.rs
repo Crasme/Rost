@@ -26,6 +26,7 @@ impl KeyboardHandlers {
         }
     }
 
+    #[allow(dead_code)] // TODO : remove
     pub fn remove_handler(&mut self, handler: fn(DecodedKey)) {
         let mut i = 0;
         while i < self.num_handlers {
@@ -62,7 +63,6 @@ pub fn run_handlers(keyboard: &KEYBOARD) {
     let scancode: u8 = unsafe { port.read() };
     if let Ok(Some(key_event)) = keyboard_l.add_byte(scancode) {
         if let Some(key) = keyboard_l.process_keyevent(key_event) {
-            // run all handlers
             HANDLERS.lock().run_handlers(key);
         }
     }

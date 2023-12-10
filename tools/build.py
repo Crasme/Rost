@@ -10,6 +10,46 @@ log = lambda text, level : colorprint(f"[{level[1]}] {text}", color=level[0])
 command = lambda command : os.system(command)
 
 DISK_SIZE = 1000 # in sectors
+CHUNK_SIZE = 512
+assert CHUNK_SIZE == 512, "Error in chunk size"
+
+def make_filesystem():
+    log("Mise des fichiers dans le disque", Log.INFO)
+    file = open("./output/rost.iso", "rb")
+    file_content = list(file.read())
+    
+    file_content = [file_content[i:i+CHUNK_SIZE] for i in range(0, len(file_content), CHUNK_SIZE)]
+
+    # on récupère que le vrai disque
+    while file_content[0] != [ord("@")]*512:
+        file_content.pop(0)
+    file_content.pop(0)
+    file_content.pop()
+
+    # on set le premier secteur
+    value = 0xdeadbeef
+    for i in range(4):
+        file_content[0][i] = (value & ((0xFF) << i*8)) >> i*8
+
+    # on recrée le vrai disque
+    true_disk = open("./output/rost.iso", "rb")
+    true_file_content = list(true_disk.read())
+    true_file_content = [true_file_content[i:i+CHUNK_SIZE] for i in range(0, len(true_file_content), CHUNK_SIZE)]
+    i = 0
+    while true_file_content[i] != [ord("@")]*512:
+        i += 1
+    i += 1
+    DIFF = i
+    while i-DIFF < DISK_SIZE:
+        true_file_content[i] = file_content[i-DIFF]
+        i += 1
+
+    file = open("./output/rost.iso", "wb")
+    for thing in true_file_content:
+        file.write(bytes(thing))
+    file.close()
+
+    log("Fin de mise des fichiers dans le disque", Log.INFO)
 
 def build():
     command("clear")
@@ -50,6 +90,9 @@ def run():
     file = open("./output/rost.iso", "wb")
     file.write(file_as_text)
     file.close()
+
+    make_filesystem()
+
     command("qemu-system-x86_64 -drive format=raw,file=output/rost.iso -serial stdio")
 
     log("Arret de Rost", Log.INFO)
