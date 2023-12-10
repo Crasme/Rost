@@ -34,7 +34,7 @@ fn main(boot_info: &'static BootInfo) -> ! {
     println!("Boot complete");
     utils::init(boot_info);
 
-    let _x = Box::new(41);
+    //let _x = Box::new(41);
 
     libs::general::hlt_loop();
 }

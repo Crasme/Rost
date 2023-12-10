@@ -91,9 +91,10 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
     } else if is_the_same(command, "reboot") {
         drivers::qemu::restart_qemu();
     } else if is_the_same(command, "test") {
+        let x = Box::new(41);
         let y = Box::new(42);
-        println!("{}", y);
-        println!("{}", *y);
+        println!("{:?}", *x);
+        println!("{:?}", *y);
     } else {
         print!("Unknown command : ");
         print_buffer(command);
