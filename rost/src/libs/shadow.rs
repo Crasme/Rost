@@ -6,8 +6,8 @@ use crate::println;
 
 pub struct MemoryAllocator;
 
-const DISK_SIZE: usize = KILO_BYTE * 1024;
-static mut MEM: [u8; DISK_SIZE] = [0; DISK_SIZE];
+const MEM_SIZE: usize = KILO_BYTE * 1024;
+static mut MEM: [u8; MEM_SIZE] = [0; MEM_SIZE];
 const MAX_ALLOCS: usize = 128;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -48,6 +48,9 @@ unsafe impl GlobalAlloc for MemoryAllocator {
 
         if MEMLAYOUT.nb_allocs >= MAX_ALLOCS {
             panic!("Too much stuff allocated !");
+        }
+        if new_alloc.ptr > MEM.as_ptr().wrapping_add(MEM_SIZE) as *mut u8 {
+            panic!("Stuff allocated was too big !")
         }
 
         MEMLAYOUT.allocs[MEMLAYOUT.nb_allocs] = Some(new_alloc);

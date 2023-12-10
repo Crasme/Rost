@@ -1,3 +1,4 @@
+use alloc::vec;
 use lazy_static::lazy_static;
 use pc_keyboard::DecodedKey;
 
@@ -91,10 +92,9 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
     } else if is_the_same(command, "reboot") {
         drivers::qemu::restart_qemu();
     } else if is_the_same(command, "test") {
-        let x = Box::new(41);
-        let y = Box::new(42);
-        println!("{:?}", *x);
-        println!("{:?}", *y);
+        for _ in 0..100 {
+            let x = Box::new(41);
+        }
     } else {
         print!("Unknown command : ");
         print_buffer(command);
