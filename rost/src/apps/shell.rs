@@ -85,6 +85,8 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
         print!("Available commands :\n");
         print!("help : show this help\n");
         print!("clear : clear the screen\n");
+        print!("stop : stops Rost\n");
+        print!("reboot : reboots rost\n");
     } else if is_the_same(command, "clear") {
         drivers::vga::clear_screen();
     } else if is_the_same(command, "stop") {
@@ -92,9 +94,11 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
     } else if is_the_same(command, "reboot") {
         drivers::qemu::restart_qemu();
     } else if is_the_same(command, "test") {
-        for _ in 0..100 {
-            let x = Box::new(41);
-        }
+        let x = Box::new(41);
+        let y = Box::new(42);
+        let z = vec![1, 2];
+        println!("{:?}, {:?}", *x, *y);
+        println!("{:?}", z);
     } else {
         print!("Unknown command : ");
         print_buffer(command);
@@ -129,8 +133,16 @@ fn run_key(key: DecodedKey) {
     }
 }
 
-pub fn init() {
+pub fn activate_shell() {
     keyboard::HANDLERS.lock().add_handler(run_key);
     // we show the prompt
     print!("\n> ");
+}
+
+pub fn _desactivate_shell() {
+    keyboard::HANDLERS.lock().remove_handler(run_key);
+}
+
+pub fn init() {
+    activate_shell();
 }

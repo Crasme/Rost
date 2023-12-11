@@ -13,14 +13,7 @@ use crate::{
 };
 
 pub fn init(_boot_info: &'static BootInfo) {
-    // init of drivers
-    print!("Initialising disk... ");
-    interrupts::without_interrupts(|| {
-        drivers::disk::init();
-    });
-    println!("[OK] ({} sectors)", drivers::disk::get_sectors_count());
-
-    // init of libs
+    // init of core libs
     print!("Loading interrupt table... ");
     libs::interrupts::init_idt();
     println!("[OK]");
@@ -33,6 +26,15 @@ pub fn init(_boot_info: &'static BootInfo) {
     print!("Enabling interrupts... ");
     x86_64::instructions::interrupts::enable();
     println!("[OK]");
+
+    // init of drivers
+    print!("Initialising disk... ");
+    interrupts::without_interrupts(|| {
+        drivers::disk::init();
+    });
+    println!("[OK] ({} sectors)", drivers::disk::get_sectors_count());
+
+    // init of libs
     print!("Enabling the filesystem... ");
     libs::filesystem::init();
     println!("[OK]");
