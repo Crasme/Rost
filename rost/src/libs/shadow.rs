@@ -6,61 +6,59 @@ use crate::println;
 
 pub struct MemoryAllocator;
 
-const MEM_SIZE: usize = KILO_BYTE * 1024;
-static mut MEM: [u8; MEM_SIZE] = [0; MEM_SIZE];
-const MAX_ALLOCS: usize = 128;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct Alloc {
-    ptr: *mut u8,
-    size: usize,
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum BlockState {
+    Free,
+    Used,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct MemoryLayout {
-    allocs: [core::option::Option<Alloc>; MAX_ALLOCS],
-    nb_allocs: usize,
-}
+const BLOCK_SIZE: usize = KILO_BYTE * 4;
+const BLOCK_NUMBER: usize = 1024;
+const MEM_SIZE: usize = BLOCK_SIZE * BLOCK_NUMBER;
+static mut MEMORY: [u8; MEM_SIZE] = [0; MEM_SIZE];
+static mut BLOCKS: [BlockState; BLOCK_NUMBER] = [BlockState::Free; BLOCK_NUMBER];
 
-static mut MEMLAYOUT: MemoryLayout = MemoryLayout {
-    allocs: [None; MAX_ALLOCS],
-    nb_allocs: 0,
-};
-
-// TODO : make better
 unsafe impl GlobalAlloc for MemoryAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let mut ptr = MEM.as_ptr() as *mut u8;
-        for t_alloc in MEMLAYOUT.allocs {
-            let alloc = t_alloc.unwrap_or( Alloc {
-                ptr: 0 as *mut u8,
-                size: 0,
-            });
-            if alloc.ptr >= ptr {
-                ptr = alloc.ptr.wrapping_add(alloc.size);
+        // we want contiguous memory
+        let nb_blocks = layout.size() / BLOCK_SIZE + 1;
+        let mut start_block = 0;
+        let mut nb_free_blocks = 0;
+        for (i, block) in BLOCKS.iter().enumerate() {
+            nb_free_blocks += 1;
+            if *block == BlockState::Free {
+                if nb_free_blocks == nb_blocks {
+                    start_block = i + 1 - nb_free_blocks;
+                    break;
+                }
+            } else {
+                nb_free_blocks = 0;
             }
         }
-
-        let new_alloc = Alloc {
-            ptr: ptr,
-            size: layout.size(),
-        };
-
-        if MEMLAYOUT.nb_allocs >= MAX_ALLOCS {
-            panic!("Too much stuff allocated !");
+        if nb_free_blocks == nb_blocks {
+            for i in start_block..start_block + nb_blocks {
+                BLOCKS[i] = BlockState::Used;
+            }
+            return &mut MEMORY[start_block * BLOCK_SIZE];
         }
-        if new_alloc.ptr > MEM.as_ptr().wrapping_add(MEM_SIZE) as *mut u8 {
-            panic!("Stuff allocated was too big !")
-        }
-
-        MEMLAYOUT.allocs[MEMLAYOUT.nb_allocs] = Some(new_alloc);
-        MEMLAYOUT.nb_allocs += 1;
-
-        ptr
+        null_mut()
     }
 
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        // panic!("dealloc should be never called")
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        // we look for the block corresponding to the ptr
+        println!("{:?}", BLOCKS);
+        let mut start_block = 0;
+        for (i, _block) in BLOCKS.iter().enumerate() {
+            if &MEMORY[i * BLOCK_SIZE] == &*ptr {
+                start_block = i;
+                break;
+            }
+        }
+        // we free thesize of the layout
+        let nb_blocks = layout.size() / BLOCK_SIZE + 1;
+        for i in start_block..start_block + nb_blocks {
+            BLOCKS[i] = BlockState::Free;
+        }
     }
 }
 
