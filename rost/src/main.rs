@@ -2,7 +2,15 @@
 //! It is responsible for initializing the kernel and starting the first process.
 
 #![allow(unused_imports)]
-#![deny(clippy::all)]
+#![warn(
+    clippy::all,
+    // clippy::restriction, // add some?
+    clippy::pedantic,
+    clippy::nursery,
+    // clippy::cargo, // TO ADD
+)]
+#![allow(clippy::large_types_passed_by_value)]
+#![allow(clippy::cast_possible_truncation)]
 
 #![no_std]
 #![no_main]
@@ -32,7 +40,7 @@ entry_point!(main);
 
 /// Entry point of the kernel
 #[no_mangle]
-fn main(boot_info: &'static BootInfo) -> ! {
+extern "Rust" fn main(boot_info: &'static BootInfo) -> ! {
     use x86_64::{structures::paging::{Translate, Page}, VirtAddr};
 
     println!("Boot complete");

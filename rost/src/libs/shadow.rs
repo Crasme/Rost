@@ -37,7 +37,7 @@ unsafe impl GlobalAlloc for MemoryAllocator {
         }
         if nb_free_blocks == nb_blocks {
             for block in BLOCKS.iter_mut().skip(start_block).take(nb_blocks) {
-                *block = BlockState::Used
+                *block = BlockState::Used;
             }
             return &mut MEMORY[start_block * BLOCK_SIZE];
         }

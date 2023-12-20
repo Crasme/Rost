@@ -29,8 +29,8 @@ pub enum Color {
 struct Couleur(u8);
 
 impl Couleur {
-    fn new(foreground: Color, background: Color) -> Couleur {
-        Couleur((background as u8) << 4 | (foreground as u8))
+    const fn new(foreground: Color, background: Color) -> Self {
+        Self((background as u8) << 4 | (foreground as u8))
     }
 }
 
@@ -175,5 +175,5 @@ pub fn _print(args: fmt::Arguments) {
     use x86_64::instructions::interrupts;
     interrupts::without_interrupts(|| {
         WRITER.lock().write_fmt(args).unwrap();
-    })
+    });
 }

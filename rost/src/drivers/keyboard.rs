@@ -4,14 +4,14 @@ use pc_keyboard::DecodedKey;
 use spin::Mutex;
 
 use crate::libs::interrupts::KEYBOARD;
-pub struct KeyboardHandlers {
+pub struct Handlers {
     handlers: [Option<fn(DecodedKey)>; 10],
     num_handlers: usize,
 }
 
-impl KeyboardHandlers {
-    pub fn new() -> KeyboardHandlers {
-        KeyboardHandlers {
+impl Handlers {
+    pub fn new() -> Self {
+        Self {
             handlers: [None; 10],
             num_handlers: 0,
         }
@@ -37,9 +37,7 @@ impl KeyboardHandlers {
             }
             i += 1;
         }
-        if i == self.num_handlers {
-            panic!("Handler not found");
-        }
+        assert!(i != self.num_handlers, "Handler not found"); 
     }
 
     pub fn run_handlers(&self, key: DecodedKey) {
@@ -53,7 +51,7 @@ impl KeyboardHandlers {
 
 // array of handlers that take a decodedkey and return nothing (10 max)
 lazy_static! {
-    pub static ref HANDLERS: Mutex<KeyboardHandlers> = Mutex::new(KeyboardHandlers::new());
+    pub static ref HANDLERS: Mutex<Handlers> = Mutex::new(Handlers::new());
 }
 
 pub fn run_handlers(keyboard: &KEYBOARD) {

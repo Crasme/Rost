@@ -3,7 +3,7 @@
 use core::arch::asm;
 use crate::libs;
 
-pub fn exit_qemu() {
+pub fn exit() {
     // TODO : fix
     use x86_64::instructions::port::Port;
 
@@ -20,7 +20,7 @@ pub fn exit_qemu() {
     }
 }
 
-pub fn restart_qemu() {
+pub fn restart() {
     use x86_64::instructions::port::Port;
 
     let mut good = 0x02;
@@ -34,7 +34,7 @@ pub fn restart_qemu() {
     }
 
     unsafe {
-        Port::new(0x64).write(0xFE_u32)
+        Port::new(0x64).write(0xFE_u32);
     }
 
     libs::general::hlt_loop();

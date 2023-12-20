@@ -10,7 +10,5 @@ pub fn init() {
     // if the first u32 isnt our magic number, we raise an error
     // print buffer[0] as hexa
     print!("{:#04x} ", buffer[0]);
-    if buffer[0] != 0xdeadbeef {
-        panic!("Filesystem corrupted");
-    }
+    assert!(buffer[0] == 0xdead_beef, "Filesystem corrupted");
 }

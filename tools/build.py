@@ -46,11 +46,9 @@ def build():
     command("rm -Rf ./output/disk/*")
     command("mkdir output")
     command("mkdir output/disk")
-    # on lance clippy avant
+    # on lance clippy
     # TODO : setup
     command("cd rost && cargo clippy")
-    # on compile
-    command("cd rost && cargo build")
     command("rm ./output/rost.iso")
     command("cd rost && cargo bootimage")
     command("mv ./rost/target/x86_64-rost/debug/bootimage-rost.bin ./output/rost.iso")

@@ -25,7 +25,7 @@ pub fn _print(args: ::core::fmt::Arguments) {
 
 /// Prints to the host through the serial interface.
 #[macro_export]
-macro_rules! serial_print {
+macro_rules! sprint {
     ($($arg:tt)*) => {
         $crate::drivers::serial::_print(format_args!($($arg)*));
     };
@@ -33,7 +33,7 @@ macro_rules! serial_print {
 
 /// Prints to the host through the serial interface, appending a newline.
 #[macro_export]
-macro_rules! serial_println {
+macro_rules! sprintln {
     () => ($crate::serial_print!("\n"));
     ($fmt:expr) => ($crate::serial_print!(concat!($fmt, "\n")));
     ($fmt:expr, $($arg:tt)*) => ($crate::serial_print!(

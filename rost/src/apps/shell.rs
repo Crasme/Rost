@@ -19,8 +19,8 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn new() -> Writer {
-        Writer {
+    pub const fn new() -> Self {
+        Self {
             content: ['\0'; drivers::vga::BUFFER_WIDTH],
             cursor_pos: 0,
         }
@@ -59,7 +59,7 @@ lazy_static! {
 }
 
 fn print_buffer(buffer: [char; drivers::vga::BUFFER_WIDTH]) {
-    for c in buffer.iter() {
+    for c in &buffer {
         if *c == '\0' {
             return;
         }
@@ -90,16 +90,16 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
     } else if is_the_same(command, "clear") {
         drivers::vga::clear_screen();
     } else if is_the_same(command, "stop") {
-        drivers::qemu::exit_qemu();
+        drivers::qemu::exit();
     } else if is_the_same(command, "reboot") {
-        drivers::qemu::restart_qemu();
+        drivers::qemu::restart();
     } else if is_the_same(command, "test") {
+        use drivers::disk::read_sector;
         let x = Box::new(41);
         let y = Box::new(42);
         let z = vec![1, 2];
         println!("{:?}, {:?}", *x, *y);
         println!("{:?}", z);
-        use drivers::disk::read_sector;
         println!("{:?}", read_sector(0));
         println!("{:?}", read_sector(1));
     } else {
@@ -136,16 +136,16 @@ fn run_key(key: DecodedKey) {
     }
 }
 
-pub fn activate_shell() {
+pub fn activate() {
     keyboard::HANDLERS.lock().add_handler(run_key);
     // we show the prompt
     print!("\n> ");
 }
 
-pub fn _desactivate_shell() {
+pub fn _desactivate() {
     keyboard::HANDLERS.lock().remove_handler(run_key);
 }
 
 pub fn init() {
-    activate_shell();
+    activate();
 }

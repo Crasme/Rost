@@ -33,9 +33,7 @@ pub enum Status {
 }
 
 pub fn is_ok(raw: u32) {
-    if raw >= get_sectors_count() && DISK_STATE.lock().end != 0 {
-        panic!("Disk error : sector too big : {} (max {})", raw, get_sectors_count()-1);
-    }
+    assert!(!(raw >= get_sectors_count() && DISK_STATE.lock().end != 0), "Disk error : sector too big : {} (max {})", raw, get_sectors_count()-1);
 }
 
 pub fn write_sector(raw_sector_nb: u32, data: [u32; 128]) {
