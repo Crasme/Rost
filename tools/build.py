@@ -1,4 +1,5 @@
 from mod.Colorprint import colorprint
+import mod.Filesystem as Filesystem
 import os
 
 class Log:
@@ -14,22 +15,7 @@ CHUNK_SIZE = 512
 assert CHUNK_SIZE == 512, "Error in chunk size"
 
 def make_filesystem():
-    log("Mise des fichiers dans le disque", Log.INFO)
-    file = open("./output/rost.iso", "rb")
-    file_content = list(file.read())
-    
-    file_content = [file_content[i:i+CHUNK_SIZE] for i in range(0, len(file_content), CHUNK_SIZE)]
-
-    # on récupère que le vrai disque
-    while file_content[0] != [ord("@")]*512:
-        file_content.pop(0)
-    file_content.pop(0)
-    file_content.pop()
-
-    # on set le premier secteur
-    value = 0xdeadbeef
-    for i in range(4):
-        file_content[0][i] = (value & ((0xFF) << i*8)) >> i*8
+    file_content = Filesystem.make_disk(DISK_SIZE, CHUNK_SIZE)
 
     # on recrée le vrai disque
     true_disk = open("./output/rost.iso", "rb")
@@ -57,7 +43,9 @@ def build():
 
     # TODO : passer sur les fichiers et vérifier le formatage
 
+    command("rm -Rf ./output/disk/*")
     command("mkdir output")
+    command("mkdir output/disk")
     command("cd rost && cargo build")
     command("rm ./output/rost.iso")
     command("cd rost && cargo bootimage")
@@ -75,7 +63,7 @@ def run():
     print(f"{len(file_content) // 512} sectors before")
     # we check if we already added
     # todo : extract and insert disk
-    if file_content[-512:] == [ord("@")]*512:
+    if file_content[-512:] == [ord("@")]*512: # type: ignore
         print("Disk already made...")
     else:
         print("Adding disk...")

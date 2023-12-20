@@ -46,7 +46,6 @@ unsafe impl GlobalAlloc for MemoryAllocator {
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
         // we look for the block corresponding to the ptr
-        println!("{:?}", BLOCKS);
         let mut start_block = 0;
         for (i, _block) in BLOCKS.iter().enumerate() {
             if &MEMORY[i * BLOCK_SIZE] == &*ptr {
@@ -54,7 +53,7 @@ unsafe impl GlobalAlloc for MemoryAllocator {
                 break;
             }
         }
-        // we free thesize of the layout
+        // we free the size of the layout
         let nb_blocks = layout.size() / BLOCK_SIZE + 1;
         for i in start_block..start_block + nb_blocks {
             BLOCKS[i] = BlockState::Free;

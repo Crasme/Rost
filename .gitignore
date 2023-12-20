@@ -8,3 +8,6 @@ rost/Cargo.lock
 output/*
 
 **/*.rs.bk
+
+tools/mod/__pycache__
+tools/mod/__pycache__/*

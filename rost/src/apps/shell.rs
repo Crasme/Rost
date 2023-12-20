@@ -99,6 +99,9 @@ fn run_command(command: [char; drivers::vga::BUFFER_WIDTH]) {
         let z = vec![1, 2];
         println!("{:?}, {:?}", *x, *y);
         println!("{:?}", z);
+        use drivers::disk::read_sector;
+        println!("{:?}", read_sector(0));
+        println!("{:?}", read_sector(1));
     } else {
         print!("Unknown command : ");
         print_buffer(command);
