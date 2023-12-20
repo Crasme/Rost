@@ -8,9 +8,9 @@ pub fn exit_qemu() {
     use x86_64::instructions::port::Port;
 
     unsafe {
-        Port::new(0x604).write(0x2000 as u32);  // QEMU
-        Port::new(0xB004).write(0x2000 as u32); // BOCHS
-        Port::new(0x4004).write(0x3400 as u32); // VIRTUALBOX
+        Port::new(0x604).write(0x2000_u32);  // QEMU
+        Port::new(0xB004).write(0x2000_u32); // BOCHS
+        Port::new(0x4004).write(0x3400_u32); // VIRTUALBOX
     }
 
     // we stop interrupts
@@ -34,7 +34,7 @@ pub fn restart_qemu() {
     }
 
     unsafe {
-        Port::new(0x64).write(0xFE as u32)
+        Port::new(0x64).write(0xFE_u32)
     }
 
     libs::general::hlt_loop();

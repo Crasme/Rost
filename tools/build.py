@@ -46,10 +46,16 @@ def build():
     command("rm -Rf ./output/disk/*")
     command("mkdir output")
     command("mkdir output/disk")
+    # on lance clippy avant
+    # TODO : setup
+    command("cd rost && cargo clippy")
+    # on compile
     command("cd rost && cargo build")
     command("rm ./output/rost.iso")
     command("cd rost && cargo bootimage")
     command("mv ./rost/target/x86_64-rost/debug/bootimage-rost.bin ./output/rost.iso")
+
+    # TODO : add settings
 
     log("Fin du build", Log.INFO)
 
@@ -78,7 +84,6 @@ def run():
     file = open("./output/rost.iso", "wb")
     file.write(file_as_text)
     file.close()
-
     make_filesystem()
 
     command("qemu-system-x86_64 -drive format=raw,file=output/rost.iso -serial stdio")

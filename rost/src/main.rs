@@ -1,5 +1,8 @@
-// TO DESACTIVATE
+//! This is the main file of the rost kernel.
+//! It is responsible for initializing the kernel and starting the first process.
+
 #![allow(unused_imports)]
+#![deny(clippy::all)]
 
 #![no_std]
 #![no_main]
@@ -27,6 +30,7 @@ fn panic(info: &PanicInfo) -> ! {
 
 entry_point!(main);
 
+/// Entry point of the kernel
 #[no_mangle]
 fn main(boot_info: &'static BootInfo) -> ! {
     use x86_64::{structures::paging::{Translate, Page}, VirtAddr};

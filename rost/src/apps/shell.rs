@@ -73,7 +73,7 @@ fn is_the_same(command: [char; drivers::vga::BUFFER_WIDTH], raw_command: &str) -
             return false;
         }
     }
-    return true;
+    true
 }
 
 // TO ADD : https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html

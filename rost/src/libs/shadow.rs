@@ -36,8 +36,8 @@ unsafe impl GlobalAlloc for MemoryAllocator {
             }
         }
         if nb_free_blocks == nb_blocks {
-            for i in start_block..start_block + nb_blocks {
-                BLOCKS[i] = BlockState::Used;
+            for block in BLOCKS.iter_mut().skip(start_block).take(nb_blocks) {
+                *block = BlockState::Used
             }
             return &mut MEMORY[start_block * BLOCK_SIZE];
         }
@@ -48,15 +48,15 @@ unsafe impl GlobalAlloc for MemoryAllocator {
         // we look for the block corresponding to the ptr
         let mut start_block = 0;
         for (i, _block) in BLOCKS.iter().enumerate() {
-            if &MEMORY[i * BLOCK_SIZE] == &*ptr {
+            if MEMORY[i * BLOCK_SIZE] == *ptr {
                 start_block = i;
                 break;
             }
         }
         // we free the size of the layout
         let nb_blocks = layout.size() / BLOCK_SIZE + 1;
-        for i in start_block..start_block + nb_blocks {
-            BLOCKS[i] = BlockState::Free;
+        for item in BLOCKS.iter_mut().skip(start_block).take(nb_blocks) {
+            *item = BlockState::Free;
         }
     }
 }

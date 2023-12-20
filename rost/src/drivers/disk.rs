@@ -24,12 +24,12 @@ lazy_static! {
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
-pub enum STATUS {
-    StatusBsy  = 0x80,
-    StatusRdy  = 0x40,
-    StatusDrq  = 0x08,
-    StatusDf   = 0x20,
-    StatusErr  = 0x01,
+pub enum Status {
+    Bsy  = 0x80,
+    Rdy  = 0x40,
+    Drq  = 0x08,
+    Df   = 0x20,
+    Err  = 0x01,
 }
 
 pub fn is_ok(raw: u32) {
@@ -45,18 +45,18 @@ pub fn write_sector(raw_sector_nb: u32, data: [u32; 128]) {
     ata_wait_rdy();
     unsafe {
         Port::new(0x1F6).write(0xE0 | ((sector_nb >> 24) & 0x0F) as u8);
-        Port::new(0x1F1).write(0x00 as u8);
-        Port::new(0x1F2).write(0x01 as u8);
+        Port::new(0x1F1).write(0x00_u8);
+        Port::new(0x1F2).write(0x01_u8);
         Port::new(0x1F3).write(sector_nb as u8);
         Port::new(0x1F4).write((sector_nb >> 8) as u8);
         Port::new(0x1F5).write((sector_nb >> 16) as u8);
-        Port::new(0x1F7).write(0x30 as u8);
+        Port::new(0x1F7).write(0x30_u8);
     }
     ata_wait_bzy();
     ata_wait_rdy(); // strange
-    for i in 0..128 {
+    for item in data {
         unsafe {
-            Port::new(0x1F0).write(data[i] as u32);
+            Port::new(0x1F0).write(item);
         }
     }
 }
@@ -68,19 +68,19 @@ pub fn read_sector(raw_sector_nb: u32) -> [u32; 128] {
     ata_wait_bzy();
     ata_wait_rdy();
     unsafe {
-        Port::new(0x1F6).write(0xE0 | (((sector_nb + 0) >> 24) & 0x0F) as u8);
-        Port::new(0x1F1).write(0x00 as u8);
-        Port::new(0x1F2).write(0x01 as u8);
+        Port::new(0x1F6).write(0xE0 | ((sector_nb >> 24) & 0x0F) as u8);
+        Port::new(0x1F1).write(0x00_u8);
+        Port::new(0x1F2).write(0x01_u8);
         Port::new(0x1F3).write(sector_nb as u8);
         Port::new(0x1F4).write((sector_nb >> 8) as u8);
         Port::new(0x1F5).write((sector_nb >> 16) as u8);
-        Port::new(0x1F7).write(0x20 as u8);
+        Port::new(0x1F7).write(0x20_u8);
     }
     ata_wait_bzy();
     ata_wait_rdy(); // strange
-    for i in 0..128 {
+    for item in &mut data {
         unsafe {
-            data[i] = Port::new(0x1F0).read();
+            *item = Port::new(0x1F0).read();
         }
     }
     data
@@ -93,19 +93,21 @@ pub fn get_sectors_count() -> u32 {
 
 fn ata_wait_bzy() {
     let mut port: x86_64::instructions::port::PortGeneric<u8, x86_64::instructions::port::ReadWriteAccess> = Port::new(0x1F7);
-    while unsafe { port.read() } & (STATUS::StatusBsy as u8) != 0 {
+    while unsafe { port.read() } & (Status::Bsy as u8) != 0 {
         // Wait until the BSY bit is cleared
     }
 }
 
 fn ata_wait_rdy() {
     let mut port: x86_64::instructions::port::PortGeneric<u8, x86_64::instructions::port::ReadWriteAccess> = Port::new(0x1F7);
-    while unsafe { port.read() } & (STATUS::StatusRdy as u8) == 0 {
+    while unsafe { port.read() } & (Status::Rdy as u8) == 0 {
         // Wait until the RDY bit is set
     }
 }
 
 pub fn init() {
+    #[cfg(nodisk)]
+    return;
     // lets set DISKSTATE
     // we loop on the disk until wi find a sector full of @
     let mut i = 0;

@@ -56,7 +56,7 @@ lazy_static! {
         idt[InterruptIndex::Parralel1.as_usize()].set_handler_fn(any_interrupt);
     
         idt[InterruptIndex::RealTimeClock.as_usize()].set_handler_fn(any_interrupt);
-        idt[InterruptIndex::ACPI.as_usize()].set_handler_fn(any_interrupt);
+        idt[InterruptIndex::Acpi.as_usize()].set_handler_fn(any_interrupt);
         idt[InterruptIndex::AnyPeripheral1.as_usize()].set_handler_fn(any_interrupt);
         idt[InterruptIndex::AnyPeripheral2.as_usize()].set_handler_fn(any_interrupt);
         idt[InterruptIndex::Mouse.as_usize()].set_handler_fn(any_interrupt);
@@ -81,7 +81,7 @@ pub enum InterruptIndex {
     Parralel1, // shared with parralel 2 if present
 
     RealTimeClock = PIC_2_OFFSET,
-    ACPI, // Advanced Configuration and Power Interface
+    Acpi, // Advanced Configuration and Power Interface
     AnyPeripheral1,
     AnyPeripheral2,
     Mouse,
